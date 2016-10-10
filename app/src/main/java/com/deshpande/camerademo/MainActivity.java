@@ -14,7 +14,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -25,12 +24,14 @@ public class MainActivity extends AppCompatActivity {
     private Button takePictureButton;
     private Button buttonShare;
     private ImageView imageView;
-    private Uri file;
+    private Uri uri_file;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
 
         takePictureButton = (Button) findViewById(R.id.button_image);
         imageView = (ImageView) findViewById(R.id.imageview);
@@ -39,6 +40,24 @@ public class MainActivity extends AppCompatActivity {
             takePictureButton.setEnabled(false);
             ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE }, 0);
         }
+
+        buttonShare = (Button) findViewById(R.id.button_share);
+        buttonShare.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent shareIntent = new Intent();
+                shareIntent.setAction(Intent.ACTION_SEND);
+                shareIntent.putExtra(Intent.EXTRA_STREAM, uri_file);
+                shareIntent.setType("image/*");
+                startActivity(Intent.createChooser(shareIntent, "Compartir con.."));
+
+
+
+
+
+            }
+        });
+
     }
 
     @Override
@@ -53,8 +72,8 @@ public class MainActivity extends AppCompatActivity {
 
     public void takePicture(View view) {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        file = Uri.fromFile(getOutputMediaFile());
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, file);
+        uri_file = Uri.fromFile(getOutputMediaFile());
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, uri_file);
 
         startActivityForResult(intent, 100);
     }
@@ -79,29 +98,13 @@ public class MainActivity extends AppCompatActivity {
         protected void onActivityResult(int requestCode, int resultCode, Intent data) {
             if (requestCode == 100) {
                 if (resultCode == RESULT_OK) {
-                    imageView.setImageURI(file);
+                    imageView.setImageURI(uri_file);
                 }
             }
         }
 
 
-    public void share (View v) {
 
-
-        Intent intentShare = new Intent(Intent.ACTION_SEND);
-        intentShare.setData(Uri.parse("mailto:"));
-        intentShare.putExtra(Intent.EXTRA_EMAIL, "fausto.checa@gmail.com");
-        intentShare.putExtra(Intent.EXTRA_SUBJECT, "fotoPrueba");
-
-        intentShare.putExtra(Intent.EXTRA_STREAM, file);
-        // needs permissions Mediastore
-
-        if (intentShare.resolveActivity(getPackageManager())!=null) {
-            startActivity(intentShare);
-        }
-
-
-    }
 
 
 
